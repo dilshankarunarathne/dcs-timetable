@@ -17,6 +17,7 @@
     table {
       z-index: 10;
     }
+  
   </style>
 </head>
 <body>
@@ -25,13 +26,13 @@
 
   <script src='https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js'></script><script  src="./script.js">
   </script>
-
-<div class="timetable">
+<div class="timetable_parent">
+<div class="timetable_child">
 
     <br><br><br>
     <table id="data" class="table table-striped" align="center">
     <thead>
-      <tr style="border: 1px solid black; font-family: Arial, Helvetica, sans-serif; color: crimson;">
+      <tr style="border: 1px solid black; font-family: Arial, Helvetica, sans-serif; color: crimson;" >
         <th>Time</th>
         <th>Monday</th>
         <th>Tuesday</th>
@@ -124,6 +125,6 @@
     </table>
 
     </div>
-
+</div>
 </body>
 </html>
