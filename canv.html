@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  <title>DCS TimeTable</title>
+    <style>
+      *{
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+      }
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        background-color: #333;
+        overflow: hidden;
+      }
+      canvas{
+        position:absolute;
+        background-color: #000;
+        left:0;
+        top:0;
+        z-index:-1;
+      }
+      div{
+        position:absolute;
+        z-index:0;
+        left:12px;
+        top:10px;
+      }
+      .content {
+        margin-left: auto;
+        margin-right: auto;
+        z-index: -1;
+        position:relative;
+      }
+    </style>
+  </head>
+
+  <body>
+    <canvas id="myCanvas" width="600" height="600" style="border:1px solid #c3c3c3;">
+      Your browser does not support the canvas element.
+    </canvas>
+
+    <div class="timetable">
+
+    <br><br><br>
+    <table id="data" class="table table-striped" align="center">
+    <thead>
+      <tr style="border: 1px solid black; font-family: Arial, Helvetica, sans-serif; color: crimson;">
+        <th>Time</th>
+        <th>Monday</th>
+        <th>Tuesday</th>
+        <th>Wednesday</th>
+        <th>Thursday</th>
+        <th>Friday</th>
+      </tr>
+    </thead>
+
+    <tbody>
+
+    <tr>
+      <td style="border: 1px solid rgb(134, 38, 110); font-family: Arial, Helvetica, sans-serif; color: rgb(95, 26, 112);">
+      &nbsp;&nbsp;8:30 - &nbsp;&nbsp;9:30</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td>CO1214</td>
+      <td>CO1221</td>
+    </tr>
+
+    <tr>
+      <td style="border: 1px solid rgb(134, 38, 110); font-family: Arial, Helvetica, sans-serif; color: rgb(95, 26, 112);">
+      &nbsp;&nbsp;9:30 - 10:30</td>
+      <td>CO1223</td>
+      <td>CO1224</td>
+      <td>CO1224</td>
+      <td>CO1214</td>
+      <td>CO1221</td>
+    </tr>
+
+    <tr>
+      <td style="border: 1px solid rgb(134, 38, 110); font-family: Arial, Helvetica, sans-serif; color: rgb(95, 26, 112);">
+      10:30 - 11:30</td>
+      <td>CO1222</td>
+      <td>CO1212</td>
+      <td>CO1213</td>
+      <td>CO1223</td>
+      <td></td>
+    </tr>
+
+    <tr>
+      <td style="border: 1px solid rgb(134, 38, 110); font-family: Arial, Helvetica, sans-serif; color: rgb(95, 26, 112);">
+      11:30 - 12:30</td>
+      <td>CO1222</td>
+      <td>CO1212</td>
+      <td>CO1213</td>
+      <td>CO1223</td>
+      <td></td>
+    </tr>
+
+    <tr>
+      <td style="border: 1px solid rgb(134, 38, 110); font-family: Arial, Helvetica, sans-serif; color: rgb(95, 26, 112);">
+      12:30 - &nbsp;&nbsp;1:30</td>
+      <td colspan="5" align="center" style="font-weight: bolder;">Lunch Interval</td>
+    </tr>
+
+    <tr>
+      <td style="border: 1px solid rgb(134, 38, 110); font-family: Arial, Helvetica, sans-serif; color: rgb(95, 26, 112);">
+      &nbsp;&nbsp;1:30 - &nbsp;&nbsp;2:30</td>
+      <td>CO1226</td>
+      <td></td>
+      <td>CO1226</td>
+      <td>CO1222</td>
+      <td></td>
+    </tr>
+
+    <tr>
+      <td style="border: 1px solid rgb(134, 38, 110); font-family: Arial, Helvetica, sans-serif; color: rgb(95, 26, 112);">
+      &nbsp;&nbsp;2:30 - &nbsp;&nbsp;3:30</td>
+      <td></td>
+      <td></td>
+      <td>CO1225</td>
+      <td></td>
+      <td></td>
+    </tr>
+
+    <tr>
+      <td style="border: 1px solid rgb(134, 38, 110); font-family: Arial, Helvetica, sans-serif; color: rgb(95, 26, 112);">
+      &nbsp;&nbsp;3:30 - &nbsp;&nbsp;4:30</td>
+      <td></td>
+      <td></td>
+      <td>CO1225</td>
+      <td></td>
+      <td></td>
+    </tr>
+
+
+    </tbody>
+    </table>
+
+    </div>
+
+    <script type="text/javascript">
+      var c = document.getElementById("myCanvas");
+      var ctx = c.getContext("2d");
+      var grd = ctx.createLinearGradient(0, 0, 600, 600);
+
+      grd.addColorStop(0, "#FF0000");
+      grd.addColorStop(1, "#00FF00");
+
+      ctx.fillStyle = grd;
+      ctx.fillRect(0, 0, 600, 600);
+    </script>
+  </body>
+</html>
