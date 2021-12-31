@@ -2,45 +2,15 @@
 <html lang="en">
   <head>
   <title>DCS TimeTable</title>
-    <style>
-      *{
-        -webkit-box-sizing: border-box;
-        box-sizing: border-box;
-      }
-      html, body {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-        background-color: #333;
-        overflow: hidden;
-      }
-      canvas{
-        position:absolute;
-        background-color: #000;
-        left:0;
-        top:0;
-        z-index:-1;
-      }
-      div{
-        position:absolute;
-        z-index:0;
-        left:12px;
-        top:10px;
-      }
-      .content {
-        margin-left: auto;
-        margin-right: auto;
-        z-index: -1;
-        position:relative;
-      }
-    </style>
+  <link rel="stylesheet" href="./style.css">
   </head>
 
   <body>
     <canvas id="myCanvas" width="600" height="600" style="border:1px solid #c3c3c3;">
       Your browser does not support the canvas element.
     </canvas>
-
+ <script src='https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js'></script><script  src="./script.js">
+  </script>
     <div class="timetable">
 
     <br><br><br>
