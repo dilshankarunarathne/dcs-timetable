@@ -1,288 +1,152 @@
-var canvas = document.getElementById('nokey'),
-   can_w = parseInt(canvas.getAttribute('width')),
-   can_h = parseInt(canvas.getAttribute('height')),
-   ctx = canvas.getContext('2d');
+var canvas = document.getElementById("canvas");
+var ctx = canvas.getContext("2d");
 
-// console.log(typeof can_w);
-var BALL_NUM = 30
+window.onresize = function() {
+  w = ctx.canvas.width = window.innerWidth;
+  h = ctx.canvas.height = window.innerHeight;
+};window.onresize();
 
-var ball = {
-      x: 0,
-      y: 0,
-      vx: 0,
-      vy: 0,
-      r: 0,
-      alpha: 1,
-      phase: 0
-   },
-ball_color = {
-       r: 207,
-       g: 255,
-       b: 4
-   },
-   R = 2,
-   balls = [],
-   alpha_f = 0.03,
-   alpha_phase = 0,
-    
-// Line
-   link_line_width = 0.8,
-   dis_limit = 260,
-   add_mouse_point = true,
-   mouse_in = false,
-   mouse_ball = {
-      x: 0,
-      y: 0,
-      vx: 0,
-      vy: 0,
-      r: 0,
-      type: 'mouse'
-   };
+lines = [];
 
+conf = {
+  hue: 5,
+  shadow: false,
+  width: 1,
+  length: 1,
+  emitNum: 2,
+  speed: 1,
+  opacity: 0.6,
+  maxLines: 300
+};
 
+bgDots = [
+  {
+    rad: (w+h)/2,
+    x: w/2,
+    y: 0,
+    hue: 0
+  },
+  {
+    rad: (w+h)/2,
+    x: 0,
+    y: h,
+    hue: -45
+  },
+  {
+    rad: (w+h)/2,
+    x: w,
+    y: h,
+    hue: -90
+  }
+];
 
-// Random speed
-function getRandomSpeed(pos){
-    var  min = -1,
-       max = 1;
-    switch(pos){
-        case 'top':
-            return [randomNumFrom(min, max), randomNumFrom(0.1, max)];
-            break;
-        case 'right':
-            return [randomNumFrom(min, -0.1), randomNumFrom(min, max)];
-            break;
-        case 'bottom':
-            return [randomNumFrom(min, max), randomNumFrom(min, -0.1)];
-            break;
-        case 'left':
-            return [randomNumFrom(0.1, max), randomNumFrom(min, max)];
-            break;
-        default:
-            return;
-            break;
-    }
-}
-function randomArrayItem(arr){
-    return arr[Math.floor(Math.random() * arr.length)];
-}
-function randomNumFrom(min, max){
-    return Math.random()*(max - min) + min;
-}
-console.log(randomNumFrom(0, 10));
-// Random Ball
-function getRandomBall(){
-    var pos = randomArrayItem(['top', 'right', 'bottom', 'left']);
-    switch(pos){
-        case 'top':
-            return {
-                x: randomSidePos(can_w),
-                y: -R,
-                vx: getRandomSpeed('top')[0],
-                vy: getRandomSpeed('top')[1],
-                r: R,
-                alpha: 1,
-                phase: randomNumFrom(0, 10)
-            }
-            break;
-        case 'right':
-            return {
-                x: can_w + R,
-                y: randomSidePos(can_h),
-                vx: getRandomSpeed('right')[0],
-                vy: getRandomSpeed('right')[1],
-                r: R,
-                alpha: 1,
-                phase: randomNumFrom(0, 10)
-            }
-            break;
-        case 'bottom':
-            return {
-                x: randomSidePos(can_w),
-                y: can_h + R,
-                vx: getRandomSpeed('bottom')[0],
-                vy: getRandomSpeed('bottom')[1],
-                r: R,
-                alpha: 1,
-                phase: randomNumFrom(0, 10)
-            }
-            break;
-        case 'left':
-            return {
-                x: -R,
-                y: randomSidePos(can_h),
-                vx: getRandomSpeed('left')[0],
-                vy: getRandomSpeed('left')[1],
-                r: R,
-                alpha: 1,
-                phase: randomNumFrom(0, 10)
-            }
-            break;
-    }
-}
-function randomSidePos(length){
-    return Math.ceil(Math.random() * length);
-}
+var gui = new dat.GUI();
+var f1 = gui.addFolder("Design");
+var f2 = gui.addFolder("Behaviour");
+f1.add(conf, "hue", 0, 360).step(1).name("Color");
+f1.add(conf, "opacity", 0.1, 1).step(0.1).name("Opacity");
+f1.add(conf, "width", 0.3, 3).step(0.1).name("Width");
+f1.add(conf, "length", 0.2, 2).step(0.1).name("Length");
+f2.add(conf, "emitNum", 1, 5).step(1).name("Amount");
+f2.add(conf, "speed", 0.5, 1.5).step(0.1).name("Speed");
+f2.add(conf, "maxLines", 100, 1000).step(1).name("Max Lines");
+//gui.add(conf, "shadow");
 
-// Draw Ball
-function renderBalls(){
-    Array.prototype.forEach.call(balls, function(b){
-       if(!b.hasOwnProperty('type')){
-           ctx.fillStyle = 'rgba('+ball_color.r+','+ball_color.g+','+ball_color.b+','+b.alpha+')';
-           ctx.beginPath();
-           ctx.arc(b.x, b.y, R, 0, Math.PI*2, true);
-           ctx.closePath();
-           ctx.fill();
-       }
+function emitLine(){
+  if(conf.maxLines < lines.length)
+    return;
+  for(var i = 0; i < conf.emitNum; i++){
+    var rx = Math.random() * w + 100;
+    var ry = Math.random() * h - 100;
+    lines.push({
+      x1: rx,
+      y1: ry,
+      x2: rx,
+      y2: ry,
+      length: (Math.random() * (260 - 80) + 80) * conf.length,
+      width: (Math.random() * (15 - 5) + 5) * conf.width,
+      v1: (Math.random() * (4 - 2) + 2) * conf.speed,
+      v2: (Math.random() * (1 - 0.5) + 0.5) * conf.speed,
+      half: false,
+      hue: Math.random() * 50
     });
+  }
 }
 
-// Update balls
-function updateBalls(){
-    var new_balls = [];
-    Array.prototype.forEach.call(balls, function(b){
-        b.x += b.vx;
-        b.y += b.vy;
-        
-        if(b.x > -(50) && b.x < (can_w+50) && b.y > -(50) && b.y < (can_h+50)){
-           new_balls.push(b);
-        }
-        
-        // alpha change
-        b.phase += alpha_f;
-        b.alpha = Math.abs(Math.cos(b.phase));
-        // console.log(b.alpha);
-    });
-    
-    balls = new_balls.slice(0);
+function drawBackground(){
+  ctx.globalCompositeOperation = "lighter";
+  for(var i = 0; i < bgDots.length; i++){
+    var grd = ctx.createRadialGradient(bgDots[i].x, bgDots[i].y, 0, bgDots[i].x, bgDots[i].y, bgDots[i].rad);
+    grd.addColorStop(0, "hsla("+ (conf.hue + bgDots[i].hue) +", 100%, 60%, 0.3)");
+    grd.addColorStop(1, "hsla("+ (conf.hue + bgDots[i].hue) +", 100%, 50%, 0)");
+    ctx.beginPath();
+    ctx.arc(bgDots[i].x, bgDots[i].y, bgDots[i].rad, 0, Math.PI * 2);
+    ctx.fillStyle = grd;
+    ctx.fill();
+    ctx.closePath();
+  }
 }
 
-// loop alpha
-function loopAlphaInf(){
-    
-}
+function drawLines(){
+  ctx.globalCompositeOperation = "lighter";
+  for(var i = 0; i < lines.length; i++){
+    ctx.lineWidth = lines[i].width;
+    ctx.beginPath();
+    ctx.moveTo(lines[i].x1, lines[i].y1);
+    ctx.lineTo(lines[i].x2, lines[i].y2);
+    ctx.strokeStyle = "hsla("+(conf.hue - lines[i].hue)+", 100%, 50%, " +(conf.opacity)+ ")";
+    ctx.lineCap = "round";
+    ctx.stroke();
+    ctx.closePath();
 
-// Draw lines
-function renderLines(){
-    var fraction, alpha;
-    for (var i = 0; i < balls.length; i++) {
-        for (var j = i + 1; j < balls.length; j++) {
-           
-           fraction = getDisOf(balls[i], balls[j]) / dis_limit;
-            
-           if(fraction < 1){
-               alpha = (1 - fraction).toString();
-
-               ctx.strokeStyle = 'rgba(150,150,150,'+alpha+')';
-               ctx.lineWidth = link_line_width;
-               
-               ctx.beginPath();
-               ctx.moveTo(balls[i].x, balls[i].y);
-               ctx.lineTo(balls[j].x, balls[j].y);
-               ctx.stroke();
-               ctx.closePath();
-           }
-        }
+    if(lines[i].half == false){
+      lines[i].x1 -= lines[i].v1;
+      lines[i].y1 += lines[i].v1;
+      lines[i].x2 -= lines[i].v2;
+      lines[i].y2 += lines[i].v2;
+      if(dist(lines[i].x1, lines[i].y1, lines[i].x2, lines[i].y2) > lines[i].length){
+        lines[i].half = true;
+      }
+    }else{
+      lines[i].x1 -= lines[i].v2;
+      lines[i].y1 += lines[i].v2;
+      lines[i].x2 -= lines[i].v1;
+      lines[i].y2 += lines[i].v1;
     }
+  }
 }
 
-// calculate distance between two points
-function getDisOf(b1, b2){
-    var  delta_x = Math.abs(b1.x - b2.x),
-       delta_y = Math.abs(b1.y - b2.y);
-    
-    return Math.sqrt(delta_x*delta_x + delta_y*delta_y);
+function clear(){
+  ctx.globalCompositeOperation = "source-over";
+  ctx.beginPath();
+  ctx.fillStyle = "#000";
+  ctx.fillRect(0,0,w,h);
+  ctx.closePath();
 }
 
-// add balls if there a little balls
-function addBallIfy(){
-    if(balls.length < BALL_NUM){
-        balls.push(getRandomBall());
+function checkLines(){
+  emitLine();
+  for(var i = 0; i < lines.length; i++){
+    if(lines[i].half == true && dist(lines[i].x1, lines[i].y1, lines[i].x2, lines[i].y2) <= 10){
+      lines[i] = lines[lines.length - 1];
+      lines.pop();
+    }else if(lines[i].x1 < 0 && lines[i].x2 < 0 && lines[i].y1 > h && lines[i].y2 > h){
+      lines[i] = lines[lines.length - 1];
+      lines.pop();
     }
+  }
 }
 
-// Render
+generateLines = setInterval(checkLines, 10);
+
+function dist(x1, y1, x2, y2){
+  return Math.sqrt(Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2));
+}
+
 function render(){
-    ctx.clearRect(0, 0, can_w, can_h);
-    
-    renderBalls();
-    
-    renderLines();
-    
-    updateBalls();
-    
-    addBallIfy();
-    
-    window.requestAnimationFrame(render);
-
-ctx.font = "48px serif";
-ctx.textBaseline = "hanging";
-ctx.strokeText("Dilshan M. Karunarathne", 50, 50);
-var img = document.getElementById("mypic");
-  ctx.drawImage(img, 150, 120, 200, 200);
-
-ctx.font = '22px serif';
-ctx.strokeText("I'm a Computer Science student, Eastern University of Sri Lanka.  ", 50, 350);
-ctx.strokeText("Also a programmer and a blogger.", 50, 370)
-ctx.strokeText("Interested in de-centralized application development. ", 50, 390)
-ctx.strokeText("I have studied Computer Science, Cryptography, Computer Architecture and Web app development.", 50, 410)
-
+  clear();
+  drawBackground();
+  drawLines();
+  requestAnimationFrame(render);
 }
-
-// Init Balls
-function initBalls(num){
-    for(var i = 1; i <= num; i++){
-        balls.push({
-            x: randomSidePos(can_w),
-            y: randomSidePos(can_h),
-            vx: getRandomSpeed('top')[0],
-            vy: getRandomSpeed('top')[1],
-            r: R,
-            alpha: 1,
-            phase: randomNumFrom(0, 10)
-        });
-    }
-}
-// Init Canvas
-function initCanvas(){
-    canvas.setAttribute('width', window.innerWidth);
-    canvas.setAttribute('height', window.innerHeight);
-    
-    can_w = parseInt(canvas.getAttribute('width'));
-    can_h = parseInt(canvas.getAttribute('height'));
-}
-window.addEventListener('resize', function(e){
-    console.log('Window Resize...');
-    initCanvas();
-});
-
-function goMovie(){
-    initCanvas();
-    initBalls(BALL_NUM);
-    window.requestAnimationFrame(render);
-}
-goMovie();
-
-// Mouse effect
-canvas.addEventListener('mouseenter', function(){
-    console.log('mouseenter');
-    mouse_in = true;
-    balls.push(mouse_ball);
-});
-canvas.addEventListener('mouseleave', function(){
-    console.log('mouseleave');
-    mouse_in = false;
-    var new_balls = [];
-    Array.prototype.forEach.call(balls, function(b){
-        if(!b.hasOwnProperty('type')){
-            new_balls.push(b);
-        }
-    });
-    balls = new_balls.slice(0);
-});
-canvas.addEventListener('mousemove', function(e){
-    var e = e || window.event;
-    mouse_ball.x = e.pageX;
-    mouse_ball.y = e.pageY;
-    // console.log(mouse_ball);
-});
+render();
